@@ -1,8 +1,12 @@
+import os
+import logging
 from flask import Flask, render_template, request, jsonify, g
 from database import get_db, close_db, init_db
-import logging
 
 app = Flask(__name__)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 @app.route('/scheduling')
@@ -32,7 +36,6 @@ def check_availability():
 def submit_appointment():
     try:
         appointment_data = request.json
-        
         db = get_db()
         cursor = db.cursor()
         cursor.execute("""
@@ -55,7 +58,6 @@ def submit_appointment():
             appointment_data['medical_history']
         ))
         db.commit()
-        
         return jsonify({"message": "Appointment successfully added"})
     except Exception as e:
         logging.error(f"Error submitting appointment: {e}")

@@ -1,7 +1,9 @@
+import os
 import sqlite3
-from flask import g, Flask
+from flask import g
 
-DATABASE = 'appointment_system.db'
+# Use environment variable for database path
+DATABASE = os.path.join(os.path.dirname(__file__), 'appointment_system.db')
 
 def get_db():
     db = getattr(g, '_database', None)
