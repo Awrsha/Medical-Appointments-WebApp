@@ -17,19 +17,19 @@ def check_availability():
     try:
         doctor_id = request.args.get('doctor_id')
         date = request.args.get('date')
-        
+
         db = get_db()
         cursor = db.cursor()
         cursor.execute("""
             SELECT appointment_time FROM appointments 
             WHERE doctor_id = %s AND appointment_date = %s
         """, (doctor_id, date))
-        
-        booked_times = [row[0] for row in cursor.fetchall()]
+
+        booked_times = [row[0].strftime("%H:%M:%S") for row in cursor.fetchall()]
         return jsonify({"bookedTimes": booked_times})
     except Exception as e:
         logging.error(f"Error checking availability: {e}")
-        return jsonify({"error": "Error checking availability"}), 500
+        return jsonify({"error": "خطا در بررسی زمان‌های در دسترس. لطفاً دوباره تلاش کنید."}), 500
 
 @app.route('/submit-appointment', methods=['POST'])
 def submit_appointment():
