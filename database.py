@@ -1,38 +1,36 @@
 import os
-import sqlite3
+import psycopg2
 from flask import g
 
-# Use environment variable for database path
-DATABASE = os.path.join(os.path.dirname(__file__), 'appointment_system.db')
+DATABASE_URL = "postgresql://postgres.uqsrxumceahdhoawdabx:Awrsha2559$@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
 
 def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-    return db
+    if 'db' not in g:
+        g.db = psycopg2.connect(DATABASE_URL)
+    return g.db
 
 def close_db(e=None):
-    db = g.pop('_database', None)
+    db = g.pop('db', None)
     if db is not None:
         db.close()
 
 def init_db():
-    with sqlite3.connect(DATABASE) as db:
-        cursor = db.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS appointments (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                specialty TEXT,
-                doctor_id INTEGER,
-                appointment_date TEXT,
-                appointment_time TEXT,
-                patient_name TEXT,
-                phone_number TEXT,
-                email TEXT,
-                national_id TEXT,
-                gender TEXT,
-                insurance_type TEXT,
-                medical_history TEXT
-            )
-        ''')
-        db.commit()
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS appointments (
+            id SERIAL PRIMARY KEY,
+            specialty TEXT,
+            doctor_id INTEGER,
+            appointment_date DATE,
+            appointment_time TIME,
+            patient_name TEXT,
+            phone_number TEXT,
+            email TEXT,
+            national_id TEXT,
+            gender TEXT,
+            insurance_type TEXT,
+            medical_history TEXT
+        )
+    ''')
+    db.commit()

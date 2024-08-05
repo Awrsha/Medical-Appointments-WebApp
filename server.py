@@ -5,7 +5,6 @@ from database import get_db, close_db, init_db
 
 app = Flask(__name__)
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
@@ -23,7 +22,7 @@ def check_availability():
         cursor = db.cursor()
         cursor.execute("""
             SELECT appointment_time FROM appointments 
-            WHERE doctor_id = ? AND appointment_date = ?
+            WHERE doctor_id = %s AND appointment_date = %s
         """, (doctor_id, date))
         
         booked_times = [row[0] for row in cursor.fetchall()]
@@ -43,7 +42,7 @@ def submit_appointment():
                 specialty, doctor_id, appointment_date, appointment_time,
                 patient_name, phone_number, email, national_id,
                 gender, insurance_type, medical_history
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             appointment_data['specialty'],
             appointment_data['doctor_id'],
