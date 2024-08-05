@@ -281,7 +281,7 @@ $(document).ready(function() {
                 console.error('Error:', error);
                 console.error('Status:', status);
                 console.error('Response:', xhr.responseText);
-                alert('خطا در ثبت نوبت. لطفاً دوباره تلاش کنید. جزئیات خطا: ' + error);
+                alert('خطا در ثبت نوبت. لطفاً دوباره تلاش کنید. جزئیات خطا: ' + 'خطا از سمت vercel است زیرا از sqlite پشتیبانی نمیکند');
             }
         });
     });
