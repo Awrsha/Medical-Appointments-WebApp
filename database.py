@@ -1,30 +1,30 @@
-import os
-import psycopg2
-from flask import g, current_app
+import sqlite3
+from flask import g
 
-DATABASE_URL = "postgresql://postgres.uqsrxumceahdhoawdabx:Awrsha2559$@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+DATABASE = 'appointment_system.db'
 
 def get_db():
-    if 'db' not in g:
-        g.db = psycopg2.connect(DATABASE_URL)
-    return g.db
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
 
 def close_db(e=None):
-    db = g.pop('db', None)
+    db = g.pop('_database', None)
     if db is not None:
         db.close()
 
-def init_db():
-    with current_app.app_context():
+def init_db(app):
+    with app.app_context():
         db = get_db()
         cursor = db.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS appointments (
-                id SERIAL PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 specialty TEXT,
                 doctor_id INTEGER,
-                appointment_date DATE,
-                appointment_time TIME,
+                appointment_date TEXT,
+                appointment_time TEXT,
                 patient_name TEXT,
                 phone_number TEXT,
                 email TEXT,
@@ -35,3 +35,14 @@ def init_db():
             )
         ''')
         db.commit()
+
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+def insert_db(query, args=()):
+    db = get_db()
+    db.execute(query, args)
+    db.commit()
