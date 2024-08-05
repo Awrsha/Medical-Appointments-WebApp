@@ -1,5 +1,5 @@
 import sqlite3
-from flask import g
+from flask import g, Flask
 
 DATABASE = 'appointment_system.db'
 
@@ -14,9 +14,8 @@ def close_db(e=None):
     if db is not None:
         db.close()
 
-def init_db(app):
-    with app.app_context():
-        db = get_db()
+def init_db():
+    with sqlite3.connect(DATABASE) as db:
         cursor = db.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS appointments (
@@ -35,14 +34,3 @@ def init_db(app):
             )
         ''')
         db.commit()
-
-def query_db(query, args=(), one=False):
-    cur = get_db().execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else rv
-
-def insert_db(query, args=()):
-    db = get_db()
-    db.execute(query, args)
-    db.commit()

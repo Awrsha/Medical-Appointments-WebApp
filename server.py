@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, g
 from database import get_db, close_db, init_db
 
 app = Flask(__name__)
@@ -52,6 +52,10 @@ def submit_appointment():
     
     return jsonify({"message": "Appointment successfully added"})
 
+@app.teardown_appcontext
+def teardown_db(exception):
+    close_db()
+
 if __name__ == '__main__':
-    init_db(app)
+    init_db()
     app.run(port=5000, debug=True)
