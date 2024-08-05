@@ -50,6 +50,14 @@ def check_availability():
 def submit_appointment():
     try:
         appointment_data = request.json
+
+        # بررسی صحت داده‌ها
+        if not all(key in appointment_data for key in [
+            'specialty', 'doctor_id', 'appointment_date', 'appointment_time',
+            'patient_name', 'phone_number', 'email', 'national_id',
+            'gender', 'insurance_type', 'medical_history']):
+            return jsonify({"error": "Missing data fields."}), 400
+
         db = get_db()
         cursor = db.cursor()
         cursor.execute("""
@@ -71,11 +79,13 @@ def submit_appointment():
             appointment_data['insurance_type'],
             appointment_data['medical_history']
         ))
+
         db.commit()
         return jsonify({"message": "Appointment successfully added"})
     except Exception as e:
         logging.error(f"Error submitting appointment: {e}")
         return jsonify({"error": f"Error submitting appointment: {e}"}), 500
+
 
 @app.teardown_appcontext
 def teardown_db(exception):
