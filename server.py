@@ -1,11 +1,21 @@
-import os
 import logging
 from flask import Flask, render_template, request, jsonify, g
 from database import get_db, close_db, init_db
+from convertdate import persian
+from datetime import datetime
 
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
+
+def convert_persian_to_gregorian(persian_date_str):
+    try:
+        year, month, day = map(int, persian_date_str.split('/'))
+        gregorian_date = persian.to_gregorian(year, month, day)
+        return datetime(*gregorian_date).strftime('%Y-%m-%d')
+    except Exception as e:
+        logging.error(f"Error converting Persian date: {e}")
+        return None
 
 @app.route('/')
 @app.route('/scheduling')
@@ -17,6 +27,11 @@ def check_availability():
     try:
         doctor_id = request.args.get('doctor_id')
         date = request.args.get('date')
+
+        # تبدیل تاریخ شمسی به میلادی
+        date = convert_persian_to_gregorian(date)
+        if not date:
+            return jsonify({"error": "Invalid date format."}), 400
 
         db = get_db()
         cursor = db.cursor()
