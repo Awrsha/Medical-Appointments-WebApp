@@ -4,15 +4,14 @@
     "description": "A comprehensive medical appointment scheduling system",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js",
-        "dev": "nodemon server.js"
+      "start": "node server.js",
+      "dev": "nodemon server.js"
     },
     "dependencies": {
-        "@vercel/kv": "^3.0.0",
-        "express": "^4.21.0",
-        "sqlite3": "^5.0.2"
+      "express": "^4.17.1",
+      "sqlite3": "^5.0.2"
     },
     "devDependencies": {
-        "nodemon": "^2.0.7"
+      "nodemon": "^2.0.7"
     }
-}
+  }
