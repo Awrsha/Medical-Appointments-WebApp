@@ -159,7 +159,7 @@ We welcome contributions! See our [Contributing Guidelines](CONTRIBUTING.md) for
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the Apache-2.0 license License. See [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
