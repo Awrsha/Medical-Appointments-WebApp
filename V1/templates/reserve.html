@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم جامع نوبت‌دهی پزشکی</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+    <script src="https://unpkg.com/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        #persianDatepicker {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .datepicker-plot-area {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+            min-width: 100px;
+        }
+        
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: 55%;
+            width: 90%;
+            height: 2px;
+            background-color: #e0e0e0;
+        }
+        
+        .progress-step-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step-label {
+            font-size: 14px;
+            text-align: center;
+            color: #777;
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active .progress-step-icon {
+            background-color: #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        
+        .progress-step.active .progress-step-label {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .specialty-card, .doctor-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .specialty-card:hover, .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .specialty-card.selected, .doctor-card.selected {
+            border: 3px solid #3498db;
+        }
+        
+        .specialty-card .card-body, .doctor-card .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .specialty-card .card-title, .doctor-card .card-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .icon-input {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .icon-input i {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: #95a5a6;
+        }
+        
+        .icon-input input, .icon-input textarea, .icon-input select {
+            padding-right: 40px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-input input:focus, .icon-input textarea:focus, .icon-input select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        .btn {
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        .btn-outline-primary {
+            color: #3498db;
+            border-color: #3498db;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #3498db;
+            color: #fff;
+        }
+        
+        .time-slot-btn {
+            margin: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .time-slot-btn.active {
+            background-color: #3498db;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        #appointmentDate {
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-check-input:checked {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        
+        #timeSlots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .progress-indicator {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+        
+            .progress-step {
+                flex: 0 0 auto;
+            }
+        
+            .progress-step:not(:last-child)::after {
+                width: 50px;
+                right: 75%;
+            }
+        
+            #timeSlots {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+    </style>
+    </head>
+<body>
+    <div id="particles-js" class="position-fixed top-0 start-0 w-100 h-100"></div>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <form class="appointment-form">
+                    <h2 class="text-center mb-4">سیستم جامع نوبت‌دهی پزشکی</h2>
+                    
+                    <div class="progress-indicator mb-4">
+                        <div class="progress-step active" data-step="1">
+                            <div class="progress-step-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="progress-step-label">انتخاب تخصص</div>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                            <div class="progress-step-icon">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            <div class="progress-step-label">انتخاب پزشک</div>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                            <div class="progress-step-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="progress-step-label">انتخاب زمان</div>
+                        </div>
+                        <div class="progress-step" data-step="4">
+                            <div class="progress-step-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="progress-step-label">اطلاعات شخصی</div>
+                        </div>
+                        <div class="progress-step" data-step="5">
+                            <div class="progress-step-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="progress-step-label">تأیید نهایی</div>
+                        </div>
+                    </div>
+
+                    <div class="step active" id="step1">
+                        <h4 class="mb-3">انتخاب تخصص پزشکی</h4>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card specialty-card" data-specialty="cardiology">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-heartbeat fa-3x mb-3"></i>
+                                        <h5 class="card-title">قلب و عروق</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card specialty-card" data-specialty="neurology">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-brain fa-3x mb-3"></i>
+                                        <h5 class="card-title">مغز و اعصاب</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card specialty-card" data-specialty="orthopedics">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-bone fa-3x mb-3"></i>
+                                        <h5 class="card-title">ارتوپدی</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card specialty-card" data-specialty="dentistry">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-tooth fa-3x mb-3"></i>
+                                        <h5 class="card-title">دندانپزشکی</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card specialty-card" data-specialty="ophthalmology">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-eye fa-3x mb-3"></i>
+                                        <h5 class="card-title">چشم پزشکی</h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card specialty-card" data-specialty="dermatology">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-allergies fa-3x mb-3"></i>
+                                        <h5 class="card-title">پوست و مو</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary w-100 mt-3" id="nextToStep2" disabled>مرحله بعد</button>
+                    </div>
+
+                    <div class="step" id="step2">
+                        <h4 class="mb-3">انتخاب پزشک</h4>
+                        <div id="doctorList" class="row">
+                            <!-- Doctors will be dynamically added here -->
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" id="backToStep1">مرحله قبل</button>
+                            <button type="button" class="btn btn-primary float-end" id="nextToStep3" disabled>مرحله بعد</button>
+                        </div>
+                    </div>
+
+                    <div id="step3" class="step">
+                        <h2 class="mb-4">انتخاب زمان نوبت</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h3>تاریخ نوبت:</h3>
+                                <br>
+                                <br>
+                                <div id="persianDatepicker"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h3>ساعت نوبت:</h3>
+                                <br>
+                                <div id="timeSlots" class="mt-3"></div>
+                            </div>
+                        </div>
+                        <button id="backToStep2" class="btn btn-secondary mt-3">مرحله قبل</button>
+                        <button id="nextToStep4" class="btn btn-primary mt-3" disabled>مرحله بعد</button>
+                    </div>
+                    
+                    <div class="step" id="step4">
+                        <h4 class="mb-3">اطلاعات شخصی</h4>
+                        <div class="mb-3 icon-input">
+                            <i class="fas fa-user"></i>
+                            <input type="text" class="form-control" id="fullName" placeholder="نام و نام خانوادگی" required>
+                        </div>
+                        <div class="mb-3 icon-input">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" class="form-control" id="phoneNumber" placeholder="شماره تماس" required>
+                        </div>
+                        <div class="mb-3 icon-input">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" class="form-control" id="email" placeholder="آدرس ایمیل">
+                        </div>
+                        <div class="mb-3 icon-input">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" class="form-control" id="nationalId" placeholder="کد ملی" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">جنسیت:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="male" value="male" required>
+                                <label class="form-check-label" for="male">مرد</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="female" value="female" required>
+                                <label class="form-check-label" for="female">زن</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="insuranceType" class="form-label">نوع بیمه:</label>
+                            <select class="form-select" id="insuranceType" required>
+                                <option value="">انتخاب کنید</option>
+                                <option value="tamin">تأمین اجتماعی</option>
+                                <option value="salamat">سلامت</option>
+                                <option value="mosalah">نیروهای مسلح</option>
+                                <option value="other">سایر</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="medicalHistory" class="form-label">سابقه پزشکی (اختیاری):</label>
+                            <textarea class="form-control" id="medicalHistory" rows="3"></textarea>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" id="backToStep3">مرحله قبل</button>
+                            <button type="button" class="btn btn-primary float-end" id="nextToStep5">مرحله بعد</button>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step5">
+                        <h4 class="mb-3">تأیید نهایی</h4>
+                        <div class="summary mb-3">
+                            <h5>تخصص پزشکی:</h5>
+                            <p id="summarySpecialty"></p>
+                        </div>
+                        <div class="summary mb-3">
+                            <h5>پزشک:</h5>
+                            <p id="summaryDoctor"></p>
+                        </div>
+                        <div class="summary mb-3">
+                            <h5>تاریخ و زمان:</h5>
+                            <p id="summaryDateTime"></p>
+                        </div>
+                        <div class="summary mb-3">
+                            <h5>اطلاعات شخصی:</h5>
+                            <p id="summaryPersonalInfo"></p>
+                        </div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-secondary" id="backToStep4">مرحله قبل</button>
+                            <button id="submitAppointment" class="btn btn-primary">تأیید و ثبت نوبت</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="successModalLabel">ثبت نوبت موفق</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            درخواست شما با موفقیت ثبت گردید.
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">تایید</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-jalaali/0.9.2/moment-jalaali.min.js"></script>
+    <script src="https://unpkg.com/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#3366cc" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": false },
+                "size": { "value": 3, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#3366cc", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 6 }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": { "enable": true, "mode": "repulse" },
+                    "onclick": { "enable": true, "mode": "push" },
+                    "resize": true
+                }
+            },
+            "retina_detect": true
+        });
+        
+        $(document).ready(function() {
+            let currentStep = 1;
+            let selectedSpecialty = '';
+            let selectedDoctor = '';
+            let selectedDate = '';
+            let selectedTime = '';
+        
+            function goToNextStep() {
+                if (currentStep < 5) {
+                    $(`#step${currentStep}`).removeClass('active');
+                    currentStep++;
+                    $(`#step${currentStep}`).addClass('active');
+                    updateProgressIndicator();
+                }
+            }
+        
+            function goToPreviousStep() {
+                if (currentStep > 1) {
+                    $(`#step${currentStep}`).removeClass('active');
+                    currentStep--;
+                    $(`#step${currentStep}`).addClass('active');
+                    updateProgressIndicator();
+                }
+            }
+        
+            function updateProgressIndicator() {
+                $('.progress-step').removeClass('active');
+                for (let i = 1; i <= currentStep; i++) {
+                    $(`.progress-step[data-step=${i}]`).addClass('active');
+                }
+            }
+        
+            $('.specialty-card').on('click', function() {
+                $('.specialty-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedSpecialty = $(this).data('specialty');
+                $('#nextToStep2').prop('disabled', false);
+            });
+        
+            $('#nextToStep2').on('click', function() {
+                goToNextStep();
+        
+                const doctors = [
+                    { id: 1, name: 'دکتر علی محمدی', specialty: 'cardiology' },
+                    { id: 2, name: 'دکتر نادر سلطانی', specialty: 'cardiology' },
+                    { id: 3, name: 'دکتر لیلا هاشمی', specialty: 'cardiology' },
+                    { id: 4, name: 'دکتر امیر صالحی', specialty: 'cardiology' },
+                    { id: 5, name: 'دکتر سارا قاسمی', specialty: 'cardiology' },
+                    { id: 6, name: 'دکتر مریم احمدی', specialty: 'neurology' },
+                    { id: 7, name: 'دکتر سیاوش معین', specialty: 'neurology' },
+                    { id: 8, name: 'دکتر مهسا رستمی', specialty: 'neurology' },
+                    { id: 9, name: 'دکتر فرزاد کیانی', specialty: 'neurology' },
+                    { id: 10, name: 'دکتر گلناز احمدی', specialty: 'neurology' },
+                    { id: 11, name: 'دکتر حسن رضایی', specialty: 'orthopedics' },
+                    { id: 12, name: 'دکتر سمیرا نیکو', specialty: 'orthopedics' },
+                    { id: 13, name: 'دکتر محمد تقی پور', specialty: 'orthopedics' },
+                    { id: 14, name: 'دکتر یاسر احمدی', specialty: 'orthopedics' },
+                    { id: 15, name: 'دکتر نرگس عباس زاده', specialty: 'orthopedics' },
+                    { id: 16, name: 'دکتر آزاده کاظمی', specialty: 'dermatology' },
+                    { id: 17, name: 'دکتر سامان دهقان', specialty: 'dermatology' },
+                    { id: 18, name: 'دکتر آناهیتا مهدوی', specialty: 'dermatology' },
+                    { id: 19, name: 'دکتر میثم مرادی', specialty: 'dermatology' },
+                    { id: 20, name: 'دکتر کیانا جعفری', specialty: 'dermatology' },
+                    { id: 21, name: 'دکتر سروش حیدری', specialty: 'ophthalmology' },
+                    { id: 22, name: 'دکتر رعنا سبزی', specialty: 'ophthalmology' },
+                    { id: 23, name: 'دکتر امیرحسین ملاحی', specialty: 'ophthalmology' },
+                    { id: 24, name: 'دکتر مهتاب مهدی پور', specialty: 'ophthalmology' },
+                    { id: 25, name: 'دکتر علی اکبر معینی', specialty: 'ophthalmology' },
+                    { id: 26, name: 'دکتر حسین دینی', specialty: 'dentistry' },
+                    { id: 27, name: 'دکتر ندا قدیمی', specialty: 'dentistry' },
+                    { id: 28, name: 'دکتر پژمان نوروزی', specialty: 'dentistry' },
+                    { id: 29, name: 'دکتر مونا رضایی', specialty: 'dentistry' },
+                    { id: 30, name: 'دکتر فرشاد میرکاظمی', specialty: 'dentistry' }
+                ];
+        
+                const filteredDoctors = doctors.filter(doc => doc.specialty === selectedSpecialty);
+                $('#doctorList').empty();
+                filteredDoctors.forEach(doc => {
+                    $('#doctorList').append(`
+                        <div class="col-md-4 mb-3">
+                            <div class="card doctor-card" data-doctor-id="${doc.id}">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">${doc.name}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+        
+            $(document).on('click', '.doctor-card', function() {
+                $('.doctor-card').removeClass('selected');
+                $(this).addClass('selected');
+                selectedDoctor = $(this).data('doctor-id');
+                $('#nextToStep3').prop('disabled', false);
+            });
+        
+            $('#nextToStep3').on('click', function() {
+                goToNextStep();
+                initializePersianDatepicker();
+            });
+        
+            $('#backToStep1').on('click', function() {
+                goToPreviousStep();
+            });
+        
+            function initializePersianDatepicker() {
+                const today = new Date();
+                $("#persianDatepicker").pDatepicker({
+                    inline: true,
+                    format: 'YYYY/MM/DD',
+                    minDate: today,
+                    autoClose: false,
+                    onSelect: function(unix) {
+                        selectedDate = new Date(unix).toLocaleDateString('fa-IR');
+                        updateTimeSlots();
+                    }
+                });
+            }
+        
+            function updateTimeSlots() {
+                $.ajax({
+                    url: '/check-availability',
+                    type: 'GET',
+                    data: {
+                        doctor_id: selectedDoctor,
+                        date: selectedDate
+                    },
+                    success: function(response) {
+                        const bookedTimes = response.bookedTimes;
+                        renderTimeSlots(bookedTimes);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error checking availability:', error);
+                        alert('خطا در بررسی زمان‌های در دسترس. لطفاً دوباره تلاش کنید.');
+                    }
+                });
+            }
+        
+            function renderTimeSlots(bookedTimes) {
+                const timeSlots = [
+                    '08:00', '08:30',
+                    '09:00', '09:30',
+                    '10:00', '10:30',
+                    '11:00', '11:30',
+                    '12:00', '12:30',
+                    '13:00', '13:30',
+                    '14:00', '14:30',
+                    '15:00', '15:30',
+                    '16:00', '16:30',
+                    '17:00', '17:30',
+                    '18:00', '18:30',
+                    '19:00', '19:30'];
+        
+                const now = new Date();
+                const selectedDateTime = new Date(selectedDate);
+                const isToday = selectedDateTime.toDateString() === now.toDateString();
+        
+                $('#timeSlots').empty();
+                timeSlots.forEach(time => {
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const slotTime = new Date(selectedDateTime.getTime());
+                    slotTime.setHours(hours, minutes, 0, 0);
+                    
+                    const isPast = isToday && slotTime < now;
+                    const isBooked = bookedTimes.includes(time);
+        
+                    const buttonClass = isPast || isBooked ? 'btn-danger' : 'btn-outline-primary';
+                    const disabled = isPast || isBooked ? 'disabled' : '';
+        
+                    $('#timeSlots').append(`
+                        <div class="col">
+                            <button type="button" class="btn ${buttonClass} time-slot-btn" ${disabled} data-time="${time}">${time}</button>
+                        </div>
+                    `);
+                });
+            }
+        
+            $(document).on('click', '.time-slot-btn:not(:disabled)', function() {
+                $('.time-slot-btn').removeClass('active');
+                $(this).addClass('active');
+                selectedTime = $(this).data('time');
+                $('#nextToStep4').prop('disabled', false);
+            });
+        
+            $('#nextToStep4').on('click', function() {
+                goToNextStep();
+            });
+        
+            $('#backToStep2').on('click', function() {
+                goToPreviousStep();
+            });
+        
+            $('#nextToStep5').on('click', function() {
+                const fullName = $('#fullName').val();
+                const phoneNumber = $('#phoneNumber').val();
+                const email = $('#email').val();
+                const nationalId = $('#nationalId').val();
+                const gender = $('input[name="gender"]:checked').val();
+                const insuranceType = $('#insuranceType').val();
+                const medicalHistory = $('#medicalHistory').val();
+        
+                if (fullName && phoneNumber && nationalId && gender && insuranceType) {
+                    $('#summarySpecialty').text(selectedSpecialty);
+                    $('#summaryDoctor').text(selectedDoctor);
+                    $('#summaryDateTime').text(`${selectedDate} - ${selectedTime}`);
+                    $('#summaryPersonalInfo').html(`
+                        نام: ${fullName}<br>
+                        شماره تماس: ${phoneNumber}<br>
+                        ایمیل: ${email}<br>
+                        کد ملی: ${nationalId}<br>
+                        جنسیت: ${gender}<br>
+                        نوع بیمه: ${insuranceType}<br>
+                        سابقه پزشکی: ${medicalHistory}
+                    `);
+                    goToNextStep();
+                } else {
+                    alert('لطفاً تمامی فیلدهای مورد نیاز را پر کنید.');
+                }
+            });
+        
+            $('#backToStep3').on('click', function() {
+                goToPreviousStep();
+            });
+        
+            $('#backToStep4').on('click', function() {
+                goToPreviousStep();
+            });
+        
+            $('#submitAppointment').on('click', function(e) {
+                e.preventDefault();
+        
+                const appointmentData = {
+                    specialty: selectedSpecialty,
+                    doctor_id: selectedDoctor,
+                    appointment_date: selectedDate,
+                    appointment_time: selectedTime,
+                    patient_name: $('#fullName').val(),
+                    phone_number: $('#phoneNumber').val(),
+                    email: $('#email').val(),
+                    national_id: $('#nationalId').val(),
+                    gender: $('input[name="gender"]:checked').val(),
+                    insurance_type: $('#insuranceType').val(),
+                    medical_history: $('#medicalHistory').val()
+                };
+        
+                $.ajax({
+                    url: '/submit-appointment',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(appointmentData),
+                    success: function(response) {
+                        $('#successModal').modal('show');
+                        setTimeout(function() {
+                            $('#successModal').modal('hide');
+                            window.location.href = '/';
+                        }, 3000);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        console.error('Status:', status);
+                        console.error('Response:', xhr.responseText);
+                        alert('خطا در ثبت نوبت. لطفاً دوباره تلاش کنید. جزئیات خطا: ' + error);
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
